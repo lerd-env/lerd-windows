@@ -1,0 +1,96 @@
+name: Release
+
+# Builds a Windows alpha from lerd-env/lerd and publishes it here. Run it from
+# the Actions tab with the version to release, for example 1.37.0-alpha.1.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version, like 1.37.0-alpha.1"
+        required: true
+      ref:
+        description: "Branch, tag or commit of lerd-env/lerd to build"
+        required: true
+        default: feat/native-windows-integration
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ inputs.version }}
+      REF: ${{ inputs.ref }}
+    steps:
+      - name: Check the version
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$ ]]; then
+            echo "::error::$VERSION is not <x.y.z>-alpha.<n>"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          repository: lerd-env/lerd
+          ref: ${{ inputs.ref }}
+          path: src
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: src/go.mod
+          cache-dependency-path: src/go.sum
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: src/internal/ui/web/package-lock.json
+
+      - name: Build UI
+        working-directory: src
+        run: make build-ui
+
+      # The same zips the main release makes for Windows, built with the release
+      # repo pointed here so lerd update stays on the alpha line.
+      - name: Build the zips
+        working-directory: src
+        run: |
+          echo "SOURCE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          pkg=github.com/geodro/lerd/internal
+          flags="-s -w -X $pkg/version.Version=$VERSION -X $pkg/version.Commit=$(git rev-parse HEAD) -X $pkg/version.Date=$(date -u +%Y-%m-%dT%H:%M:%SZ) -X $pkg/origin.releaseRepo=${{ github.repository }}"
+          dist="$GITHUB_WORKSPACE/dist"
+          mkdir -p "$dist"
+          for arch in amd64 arm64; do
+            out="$RUNNER_TEMP/lerd_${VERSION}_windows_${arch}"
+            mkdir -p "$out"
+            GOOS=windows GOARCH=$arch CGO_ENABLED=0 go build -tags nogui -ldflags "$flags" -o "$out/lerd.exe" ./cmd/lerd
+            GOOS=windows GOARCH=$arch CGO_ENABLED=0 go build -ldflags "$flags -H=windowsgui" -o "$out/lerd-tray.exe" ./cmd/lerd-tray
+            cp README.md LICENSE internal/licenses/THIRD-PARTY-LICENSES.md "$out/"
+            (cd "$out" && zip -q -r "$dist/lerd_${VERSION}_windows_${arch}.zip" .)
+          done
+          sed "s|} else { 'lerd-env/lerd' }|} else { '${{ github.repository }}' }|" install.ps1 > "$dist/install.ps1"
+          grep -q "'${{ github.repository }}'" "$dist/install.ps1" || { echo "::error::install.ps1 default repo was not rewritten"; exit 1; }
+          (cd "$dist" && sha256sum lerd_*.zip > checksums.txt)
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > "$RUNNER_TEMP/notes.md" <<EOF
+          Alpha build of Lerd for native Windows, from lerd-env/lerd@${SOURCE_SHA::8} ($REF).
+
+          Install or update from an elevated PowerShell:
+
+          \`\`\`powershell
+          irm https://github.com/${{ github.repository }}/releases/latest/download/install.ps1 | iex
+          \`\`\`
+
+          Not ready for daily work yet, see the README for what is missing. Report problems on https://github.com/lerd-env/lerd/issues and mention the version.
+          EOF
+          gh release create "v$VERSION" dist/* \
+            --repo "${{ github.repository }}" \
+            --target main \
+            --latest \
+            --title "Lerd for Windows $VERSION" \
+            --notes-file "$RUNNER_TEMP/notes.md"
