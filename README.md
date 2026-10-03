@@ -33,8 +33,8 @@ release once it is stable.
 ## Alpha
 
 These builds are for trying Lerd on Windows and telling us what breaks. They are
-not ready for daily work yet: queue, schedule and the other framework workers
-are still switched off on Windows, see [What is not there yet](#what-is-not-there-yet).
+not ready for daily work yet: some pieces are missing and others have had little
+testing, see [What is not there yet](#what-is-not-there-yet).
 If you need Lerd on Windows today, run it inside
 [WSL2](https://lerd.sh/getting-started/wsl2).
 
@@ -105,12 +105,11 @@ you had before.
 
 ## What is not there yet
 
-- **Workers.** Queue, schedule, Horizon and the other framework workers are
-  switched off on Windows for now.
-- **Tinker autocomplete.** One of the bundled tools has no Windows build wired in
-  yet.
-- **Path mapping** between Windows and the machine has had little testing on
-  either Hyper-V or WSL2.
+- **Scheduled workers.** A worker that runs on a timer, such as Laravel 10's
+  `schedule:run` every minute, is skipped for now. Queue, Horizon, Vite and the
+  other workers run, and so does Laravel 11's `schedule:work`.
+- **Path mapping** between Windows and the machine has had little testing,
+  above all on WSL2.
 
 The full picture, with how each piece works, is in the
 [Windows guide](https://github.com/lerd-env/lerd/blob/feat/native-windows-integration/docs/getting-started/windows.md).
