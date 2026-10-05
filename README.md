@@ -11,7 +11,7 @@
 [![Alpha](https://img.shields.io/badge/status-alpha-orange)](#alpha)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078d4?logo=windows&logoColor=white)]()
-[![Docs](https://img.shields.io/badge/docs-lerd.sh-blue)](https://github.com/lerd-env/lerd/blob/feat/native-windows-integration/docs/getting-started/windows.md)
+[![Docs](https://img.shields.io/badge/docs-lerd.sh-blue)](https://github.com/lerd-env/lerd/blob/feat/windows-integration/docs/getting-started/windows.md)
 [![lerd](https://img.shields.io/badge/lerd-lerd.sh-ff2d20)](https://github.com/lerd-env/lerd)
 [![Reddit](https://img.shields.io/badge/Reddit-r%2Flerd-ff2d20?logo=reddit)](https://reddit.com/r/lerd)
 [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/5JK54s7xCC)
@@ -26,7 +26,7 @@ container machine, and your sites live in plain Windows folders that your
 editor, Git and Explorer already know.
 
 This repository publishes the Windows alpha builds. The code lives on the
-[`feat/native-windows-integration`](https://github.com/lerd-env/lerd/tree/feat/native-windows-integration)
+[`feat/windows-integration`](https://github.com/lerd-env/lerd/tree/feat/windows-integration)
 branch of [lerd-env/lerd](https://github.com/lerd-env/lerd) and joins the main
 release once it is stable.
 
@@ -112,7 +112,7 @@ you had before.
   above all on WSL2.
 
 The full picture, with how each piece works, is in the
-[Windows guide](https://github.com/lerd-env/lerd/blob/feat/native-windows-integration/docs/getting-started/windows.md).
+[Windows guide](https://github.com/lerd-env/lerd/blob/feat/windows-integration/docs/getting-started/windows.md).
 
 ## Feedback
 

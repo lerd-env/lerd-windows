@@ -11,7 +11,7 @@ on:
       ref:
         description: "Branch, tag or commit of lerd-env/lerd to build"
         required: true
-        default: feat/native-windows-integration
+        default: feat/windows-integration
 
 permissions:
   contents: write
